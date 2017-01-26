@@ -1,0 +1,8 @@
+django==1.9
+django_enumfield
+
+# Installed by yum
+# python-sqlite2
+
+# For testing
+pytest

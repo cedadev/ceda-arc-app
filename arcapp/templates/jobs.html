@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block contents %}
+
+<h3>A table... </h3>
+
+<table class="table table-hover"> 
+
+<thead> <tr> <th>#</th> <th>Username</th> <th>Inputs</th> <th>Other</th> </tr> </thead> 
+
+<tbody> 
+
+    {% for job in jobs %}
+
+    <tr> <th scope=row>{{ job.job_id }}</th> <td>{{ job.user.username }}</td> <td>{{ job.jobinput_set.all.0.input_name }}</td> <td>-</td> </tr>
+
+    {% endfor %}
+
+</tbody> 
+
+</table>
+
+{% endblock %}
