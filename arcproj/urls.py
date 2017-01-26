@@ -13,15 +13,19 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
+from django.conf.urls import url, include
 from django.contrib import admin
 
 import arcapp.views
 
+from django.contrib import admin
+admin.autodiscover()
+
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    url(r'^admin/', include(admin.site.urls)),
     url(r'^test/', arcapp.views.test),
     url(r'^jobs/', arcapp.views.view_jobs, name='jobs'),
-    url(r'^test2/', arcapp.views.view_test2, name='test2'),
-    url(r'^test3/', arcapp.views.view_test3, name='test3'),
+    url(r'^job/([0-9]+)/', arcapp.views.view_job, name='job'),
+    url(r'^submit/', arcapp.views.view_submit, name='submit'),
+    url(r'^.*', arcapp.views.view_home, name='home')
 ]

@@ -2,17 +2,25 @@
 
 {% block contents %}
 
-<h3>A table... </h3>
+<h2>All Jobs </h2>
+
+<p>This table lists all jobs known to the system. The most recent jobs are shown first.</p>
 
 <table class="table table-hover"> 
 
-<thead> <tr> <th>#</th> <th>Username</th> <th>Inputs</th> <th>Other</th> </tr> </thead> 
+<thead> <tr> <th>Job ID</th> <th>Username</th> <th>Remote ID</th> <th>Variable</th> <th>Date/Time</th> </tr> </thead> 
 
 <tbody> 
 
     {% for job in jobs %}
 
-    <tr> <th scope=row>{{ job.job_id }}</th> <td>{{ job.user.username }}</td> <td>{{ job.jobinput_set.all.0.input_name }}</td> <td>-</td> </tr>
+    <tr> 
+        <th scope=row><a href="{% url 'job' job.job_id %}">{{ job.job_id }}</a></th>
+        <td>{{ job.user.username }}</td>
+        <td>{{ job.remote_job_id }}</td>
+        <td>{{ job.variable }}</td> 
+        <td>{{ job.date_time|date:"Y-m-d H" }}</td>
+    </tr>
 
     {% endfor %}
 

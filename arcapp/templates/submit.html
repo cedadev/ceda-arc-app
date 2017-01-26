@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block contents %}
+
+<h2>Submit a new job using the form below</h2>
+
+<p>Your job will be submitted to LOTUS via the ARC CE interface.</p>
+
+<form action="/submit/" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit" />
+</form>
+
+{% endblock %}
