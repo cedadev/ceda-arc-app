@@ -1,4 +1,4 @@
-export BASEDIR=/usr/local/ceda-arc-app/ceda-arc-app
+export BASEDIR=$PWD
 cd $BASEDIR
 . ../venv/bin/activate
 export DJANGO_SETTINGS_MODULE=arcproj.settings
