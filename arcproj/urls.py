@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 
 import arcapp.views
 
@@ -23,9 +24,10 @@ admin.autodiscover()
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^test/', arcapp.views.test),
     url(r'^jobs/', arcapp.views.view_jobs, name='jobs'),
     url(r'^job/([0-9]+)/', arcapp.views.view_job, name='job'),
     url(r'^submit/', arcapp.views.view_submit, name='submit'),
+    url(r'^login/$', auth_views.login, name='login'),
+    url(r'^logout/$', arcapp.views.view_logout, name='logout'),
     url(r'^.*', arcapp.views.view_home, name='home')
 ]

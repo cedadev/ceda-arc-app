@@ -2,6 +2,9 @@ from __future__ import unicode_literals
 import datetime
 
 from django.db import models
+from django.utils import timezone
+UTC = timezone.UTC()
+
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
@@ -11,7 +14,7 @@ from arcapp.vocabs import STATUS_VALUES, VARIABLES, DATA_FILES
 class Job(models.Model):
 
     user = models.ForeignKey(User, verbose_name="Username")
-    job_id=models.IntegerField(primary_key=True, verbose_name="Job ID")
+    job_id=models.AutoField(primary_key=True, verbose_name="Job ID")
 
     # Remote ID can be empty until we have submitted the job and got back id
     remote_id = models.CharField(max_length=50, verbose_name="Remote Job ID")
@@ -19,7 +22,7 @@ class Job(models.Model):
                 choices=STATUS_VALUES.items(), default=STATUS_VALUES.NOT_SUBMITTED)
 
     # Inputs
-    date_time = models.DateTimeField(verbose_name="DateTime", default=datetime.datetime(1990, 1, 1, 0)) 
+    date_time = models.DateTimeField(verbose_name="DateTime", default=datetime.datetime(1990, 1, 1, 0, tzinfo=UTC))
     variable = models.CharField(max_length=20, verbose_name="Variable", 
                 choices=VARIABLES.items(), default=VARIABLES.tas)
 
@@ -32,10 +35,10 @@ class Job(models.Model):
         """
         Validate date time.
         """
-        if dt > datetime.datetime(2001, 1, 1):
+        if dt > datetime.datetime(2001, 1, 1, tzinfo=UTC):
             raise ValidationError("Date time must be between 1990 and 2000")
 
-        if dt < datetime.datetime(1990, 1, 1):
+        if dt < datetime.datetime(1990, 1, 1, tzinfo=UTC):
             raise ValidationError("Date time must be between 1990 and 2000")
 
         if dt.hour not in (0, 6, 12, 18):

@@ -8,34 +8,41 @@
 <div class="alert alert-success" role="alert">Your job was successfully submitted.</div>
 {% endif %}
 
-<p>This is information about an existing job (and cannot be edited by a user).</p>
+<p>This is information about an existing job (and cannot be edited by a user). <a href="{% url 'job' job.job_id %}">Reload</a></p>
 
 <form class="form-horizontal">
 
   <div class="form-group">
-    <label for="inputEmail3" class="col-sm-2 control-label">User</label>
+    <label for="username" class="col-sm-2 control-label">User</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="_1" value="{{ job.user.username }}" disabled>
+      <input type="text" class="form-control" id="username" value="{{ job.user.username }}" disabled>
     </div>
   </div>
   <div class="form-group">
-    <label for="inputPassword3" class="col-sm-2 control-label">Remote Job ID</label>
+    <label for="remote_id" class="col-sm-2 control-label">Remote Job ID</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="_2" value="{{ job.remote_job_id }}" disabled>
+      <input type="text" class="form-control" id="remote_id" value="{{ job.remote_job_id|default:'Not yet set' }}" disabled>
     </div>
   </div>
   <div class="form-group">
-    <label for="inputPassword3" class="col-sm-2 control-label">Variable</label>
+    <label for="variable" class="col-sm-2 control-label">Variable</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="_2" value="{{ job.variable }}" disabled>
+      <input type="text" class="form-control" id="variable" value="{{ job.variable }}" disabled>
     </div>
   </div>
   <div class="form-group">
-    <label for="inputPassword3" class="col-sm-2 control-label">Date time</label>
+    <label for="date_time" class="col-sm-2 control-label">Date time</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="_2" value='{{ job.date_time|date:"Y-m-d H" }}' disabled>
+      <input type="text" class="form-control" id="date_time" value='{{ job.date_time|date:"Y-m-d H" }}' disabled>
     </div>
   </div>
+  <div class="form-group">
+    <label for="status" class="col-sm-2 control-label">Status</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="status" value='{{ job.status }}' disabled>
+    </div>
+  </div>
+
 
 </form>
 

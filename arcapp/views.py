@@ -1,14 +1,22 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from django.http import HttpResponseRedirect
+###from django.http import HttpResponseRedirect
+from django.contrib.auth import logout
 
 from arcapp.models import *
 from arcapp.forms import *
 
-import random
+
+def view_logout(request):
+    logout(request)
+    return redirect('/')
 
 
 def view_submit(request):
+
+    if not request.user.is_authenticated() or not request.user.has_perm('arcapp.arc_ce'):
+        return redirect('/login/?next=/submit/')
+ 
     # if this is a POST request we need to process the form data
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
@@ -17,10 +25,14 @@ def view_submit(request):
 
         if form.is_valid():
             # process the data in form.cleaned_data as required
-            # ...
+            data = form.cleaned_data
+            job = Job.objects.create(variable=data['variable'], date_time=data['date_time'],
+                                     input_file_path=data['input_file_path'], user=request.user)
+            job.save()
+
+#            raise Exception("%s, %s" % (dir(job), job.variable))
             # redirect to a new URL:
-            most_recent_job = Job.objects.last()
-            return HttpResponseRedirect('/job/%s/?new=true' % most_recent_job.job_id)
+            return redirect('/job/%s/?new=true' % job.job_id)
 
     # if a GET (or any other method) we'll create a blank form
     else:
@@ -28,30 +40,13 @@ def view_submit(request):
 
     return render(request, 'submit.html', {'form': form, 'page_title': 'Submit job'})
 
-def _reset_data():
-    for objcls in (Job,):
-        objcls.objects.all().delete()
-
-    User.objects.get_or_create(username="ag")
-    User.objects.get_or_create(username="fatima")
-
-    for i in range(5):
-        Job.objects.create(user=User.objects.get(username="ag"))
-
-
-def test(request):
-    _reset_data()
-    resp = Job.objects.first().job_id
-    return HttpResponse("I am a test %s." % resp)
-
 
 def view_jobs(request):
-    _reset_data()
     jobs = Job.objects.all().order_by('job_id').reverse()
     return render(request, 'jobs.html', {'jobs': jobs, 'page_title': 'Jobs'})
 
+
 def view_job(request, job_id):
-    _reset_data()
     is_new = request.GET.get("new", False)
 
     job = Job.objects.get(job_id=int(job_id))
