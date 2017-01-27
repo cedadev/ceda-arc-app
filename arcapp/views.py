@@ -72,17 +72,18 @@ def view_job(request, job_id):
     job.save()
   
     # Check GET args to update messages to user 
-    submitted = failed = False 
-
-    if status == STATUS_VALUES.FAILED: 
-        failed = True 
+    submitted = just_failed = failed = False 
 
     submit_status = request.GET.get("submit_status", False) 
+    if submit_status == STATUS_VALUES.FAILED:
+        just_failed = True
+
+    failed = status == STATUS_VALUES.FAILED 
 
     if not failed and submit_status == STATUS_VALUES.IN_PROGRESS: 
         submitted = True 
 
-    return render(request, 'job.html', {'job': job, 'failed': failed, 'submitted': submitted, 
+    return render(request, 'job.html', {'job': job, 'failed': failed, 'submitted': submitted, 'just_failed': just_failed,
                              'download_url': download_url, 'page_title': 'Job'}) 
 
 

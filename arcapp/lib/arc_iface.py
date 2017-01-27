@@ -19,7 +19,7 @@ import random
 def rndint():
     "Random wait and return 1 or 0 - i.e. True or False."
     time.sleep(1)
-    x = [1,0,2]
+    x = [1,1,1,1,1,1,1,1,1,0,0,0,2,2,2,2,2]
     random.shuffle(x)
     return x[0]
 

@@ -8,7 +8,7 @@
     <div class="alert alert-success" role="alert">Your job was successfully submitted.</div>
 {% endif %}
 
-{% if failed %}
+{% if just_failed %}
     <div class="alert alert-danger" role="alert">Sorry - we failed to submit your job - please go back and try again.</div>
 {% endif %}
 
@@ -38,6 +38,12 @@
     <label for="date_time" class="col-sm-2 control-label">Date time</label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="date_time" value='{{ job.date_time|date:"Y-m-d H" }}' disabled>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="input_file_path" class="col-sm-2 control-label">Input file path</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="input_file_path" value='{{ job.input_file_path|default:"" }}' disabled>
     </div>
   </div>
   <div class="form-group">
