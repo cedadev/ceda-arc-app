@@ -4,8 +4,12 @@
 
 <h2>Information about job {{ job.job_id }}</h2>
 
-{% if is_new %}
-<div class="alert alert-success" role="alert">Your job was successfully submitted.</div>
+{% if submitted %}
+    <div class="alert alert-success" role="alert">Your job was successfully submitted.</div>
+{% endif %}
+
+{% if failed %}
+    <div class="alert alert-danger" role="alert">Sorry - we failed to submit your job - please go back and try again.</div>
 {% endif %}
 
 <p>This is information about an existing job (and cannot be edited by a user). <a href="{% url 'job' job.job_id %}">Reload</a></p>
@@ -39,9 +43,20 @@
   <div class="form-group">
     <label for="status" class="col-sm-2 control-label">Status</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="status" value='{{ job.status }}' disabled>
+      <input type="text" class="form-control" {% if failed %}style="color: red;"{% endif %} id="status" value='{{ job.status }}' disabled>
     </div>
   </div>
+  <div class="form-group">
+    <label for="download_url" class="col-sm-2 control-label">download_url</label>
+    <div class="col-sm-10">
+      {% if download_url %}
+          <a href="{{ download_url }}">{{ download_url }}</a>
+      {% else %}
+          Only available if/when job completed.
+      {% endif %}
+    </div>
+  </div>
+
 
 
 </form>

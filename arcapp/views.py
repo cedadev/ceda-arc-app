@@ -5,6 +5,7 @@ from django.contrib.auth import logout
 
 from arcapp.models import *
 from arcapp.forms import *
+from arcapp.lib import arc_iface
 
 
 def view_logout(request):
@@ -30,9 +31,17 @@ def view_submit(request):
                                      input_file_path=data['input_file_path'], user=request.user)
             job.save()
 
-#            raise Exception("%s, %s" % (dir(job), job.variable))
+            # Submit job to ARC CE
+            resp = arc_iface.submit_job("diff_era_nc", variable=job.variable, date_time=job.date_time.isoformat(),
+                                 input_file_path=job.input_file_path)
+            job.status = resp
+            job.save()
+
+            # Capture submit status
+            submit_status = job.status
+
             # redirect to a new URL:
-            return redirect('/job/%s/?new=true' % job.job_id)
+            return redirect('/job/%s/?submit_status=%s' % (job.job_id, submit_status.lower()))
 
     # if a GET (or any other method) we'll create a blank form
     else:
@@ -47,12 +56,35 @@ def view_jobs(request):
 
 
 def view_job(request, job_id):
-    is_new = request.GET.get("new", False)
+    job_id = int(job_id)
+    job = Job.objects.get(job_id=job_id)
 
-    job = Job.objects.get(job_id=int(job_id))
-    return render(request, 'job.html', {'job': job, 'is_new': is_new, 'page_title': 'Job'})
+    # Provide extra info if job completed
+    status, resp = arc_iface.get_job_status(12345, job_id)
+    job.status = status
+
+    if status == STATUS_VALUES.COMPLETED:
+        download_url = resp["output_path_uri"]
+        job.output_file_path = download_url
+    else:
+        download_url = None
+ 
+    job.save()
+  
+    # Check GET args to update messages to user 
+    submitted = failed = False 
+
+    if status == STATUS_VALUES.FAILED: 
+        failed = True 
+
+    submit_status = request.GET.get("submit_status", False) 
+
+    if not failed and submit_status == STATUS_VALUES.IN_PROGRESS: 
+        submitted = True 
+
+    return render(request, 'job.html', {'job': job, 'failed': failed, 'submitted': submitted, 
+                             'download_url': download_url, 'page_title': 'Job'}) 
 
 
-def view_home(request):
-    return render(request, 'index.html', {'page_title': 'Home'})
-
+def view_home(request): 
+    return render(request, 'index.html', {'page_title': 'Home'}) 
