@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %} 
 
 {% block contents %}
 
@@ -6,10 +7,17 @@
 
 <p>Your job will be submitted to LOTUS via the ARC CE interface.</p>
 
-<form action="/submit/" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Submit" />
+<form method="post" action="" class="form-horizontal">
+  {% csrf_token %}
+  {% include "form_as_bootstrap.html" %}
+
+  <div class="buttons">
+    <div class="control-label col-sm-3 col-md-2"> </div>
+    <div class="col-sm-9 col-md-10" style="padding-left: 0px;">
+      <input class="btn btn-primary" type="submit" value="{% trans 'Submit' %}" />
+    </div>
+  </div>
+
 </form>
 
 {% endblock %}
