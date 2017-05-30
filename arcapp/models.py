@@ -14,10 +14,10 @@ from arcapp.vocabs import STATUS_VALUES, VARIABLES, DATA_FILES
 class Job(models.Model):
 
     user = models.ForeignKey(User, verbose_name="Username")
-    job_id=models.AutoField(primary_key=True, verbose_name="Job ID")
+    job_id = models.AutoField(primary_key=True, verbose_name="Job ID")
 
     # Remote ID can be empty until we have submitted the job and got back id
-    remote_id = models.CharField(max_length=50, verbose_name="Remote Job ID")
+    remote_id = models.CharField(max_length=200, verbose_name="Remote Job ID")
     status = models.CharField(max_length=20, verbose_name="Job Status",
                 choices=STATUS_VALUES.items(), default=STATUS_VALUES.NOT_SUBMITTED)
 

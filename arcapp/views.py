@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-###from django.http import HttpResponseRedirect
 from django.contrib.auth import logout
 
 from arcapp.models import *
 from arcapp.forms import *
 from arcapp.lib import arc_iface
+from arcapp.vocabs import STATUS_VALUES
 
 
 def view_logout(request):
@@ -32,9 +32,17 @@ def view_submit(request):
             job.save()
 
             # Submit job to ARC CE
-            resp = arc_iface.submit_job("diff_era_nc", variable=job.variable, date_time=job.date_time.isoformat(),
-                                 input_file_path=job.input_file_path)
-            job.status = resp
+            executable = "/group_workspaces/jasmin/cedaproc/arc_ce_test/ceda-arc-app/scripts/wrap_diff_nc_era.sh"
+            remote_args = [job.variable, job.date_time.isoformat()]
+
+            status, remote_id = arc_iface.submit_job(job.job_id, executable, *remote_args, 
+                                                     input_file_path=job.input_file_path)
+
+            job.status = status
+
+            if status != STATUS_VALUES.FAILED:
+                job.remote_id = remote_id
+            
             job.save()
 
             # Capture submit status
@@ -60,7 +68,7 @@ def view_job(request, job_id):
     job = Job.objects.get(job_id=job_id)
 
     # Provide extra info if job completed
-    status, resp = arc_iface.get_job_status(12345, job_id)
+    status, resp = arc_iface.get_arc_job_status(job.remote_id, job_id)
     job.status = status
 
     if status == STATUS_VALUES.COMPLETED:
