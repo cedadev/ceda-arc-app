@@ -52,7 +52,7 @@ def submit_job(job_id, executable, *arguments, **kwargs):
 
 def _map_arc_status(status):
     "Maps ARC status to local app status."
-    status == status.lower().strip()
+    if status: status == status.lower().strip()
 
     if not status or status == 'failed':
         return STATUS_VALUES.FAILED
@@ -60,11 +60,33 @@ def _map_arc_status(status):
         return STATUS_VALUES.IN_PROGRESS
     else: 
         return STATUS_VALUES.COMPLETED
+
+
+def _cache_outputs_on_disk(remote_job_id, job_id):
+    """
+    Save the outputs to disk if not already saved.
+
+    :param remote_job_id [string]
+    :param job_id [string]
+    :return: boolean (True if saved; False if already saved).
+    """
+    output_path = "/var/www/html/arc-outputs/{0}/outputs.zip".format(job_id)
+
+    if os.path.isfile(output_path):
+        return False
+
+    dr = os.path.dirname(output_path)
+    if not os.path.isdir(dr):
+        os.mkdir(dr)
+
+    arclib.save_responses(remote_job_id, output_path) 
+    return True
  
 
 def get_arc_job_status(remote_job_id, job_id):
     """
-    Get remote job details from ARC CE.
+    Get remote job details from ARC CE. If the job status is COMPLETED then
+    download outputs if not already retrieved.
 
     :param remote_job_id (string): remote (ARC) job ID.
     :param job_id (string): local job ID.
@@ -73,4 +95,7 @@ def get_arc_job_status(remote_job_id, job_id):
     job_status = arclib.get_job_status(remote_job_id)
 
     status = _map_arc_status(job_status)
-    return status, {"output_path_uri": "http://me-dev.ceda.ac.uk/arc/outputs/%d/output.txt" % job_id}
+    if status == STATUS_VALUES.COMPLETED:
+        _cache_outputs_on_disk(remote_job_id, job_id)
+    
+    return status, {"output_path_uri": "http://localhost/arc-outputs/%d/outputs.zip" % job_id}

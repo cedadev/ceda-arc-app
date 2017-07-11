@@ -31,7 +31,7 @@ CERTS_DIR = '/etc/grid-security/certificates'
 
 # Command-line scripts
 ARC_PROXY_CMD = '/usr/bin/arcproxy'
-MYPROXY_FILE = '/tmp/x509up_u502_{0}'.format(USER)
+MYPROXY_FILE = '/tmp/x509up_u502'
 
 # ARC Server
 JASMIN_ARC_SERVER = 'jasmin-ce.ceda.ac.uk:60000/arex'
@@ -49,7 +49,7 @@ JSDL_TEMPLATE = """<JobDefinition
      <posix:POSIXApplication>
        <posix:Executable>{executable}</posix:Executable>
 __INSERT_ARGS_HERE__
-       <posix:Output>output.txt</posix:Output>
+       <posix:Output>outputs.zip</posix:Output>
        <posix:Error>errors.txt</posix:Error>
      </posix:POSIXApplication>
    </Application>
@@ -57,7 +57,7 @@ __INSERT_ARGS_HERE__
 </JobDefinition>"""
 
 # Job files
-RESULTS_FILE = "results_file.txt"
+OUTPUTS_FILE = "outputs.zip"
 ERRORS_FILE = "errors_file.txt"
 
 
@@ -231,10 +231,14 @@ def get_job_status(job_id):
     return False
 
 
-def get_job_response(job_id):
+def save_responses(job_id, output_zip_path, output_stderr_path=None):
     """
-    Returns tuple of string contents of (results, errors).
-    :param job_id:
+    Retrieve responses (output and stderr (if set)) from server and
+    save to local files.
+
+    :param job_id [string]
+    :param output_zip_path [string]
+    :param output_stderr_path [string]
     :return: None
     """
     # Get HTTPS handler to talk to service
@@ -242,18 +246,44 @@ def get_job_response(job_id):
     response = opener.open(job_id)
     page = response.read()
 
+    outputs_file_uri = re.split('"', page)[1]
+    errors_file_uri =  re.split('"', page)[3]
+
+    log.info('Retrieving results...')
+    with open(output_zip_path, 'wb') as res_writer:
+        res_writer.write(opener.open(outputs_file_uri).read())
+
+    if output_stderr_path:
+        log.info('Retrieving errors (if any)...')
+        with open(output_stderr_path, 'w') as err_writer:
+            err_writer.write(opener.open(errors_file_uri).read())
+
+
+def get_job_response(job_id, show_full=False):
+    """
+    Returns tuple of string contents of (results, errors).
+    :param job_id:
+    :param show_full: boolean - log full response if True
+    :return: None
+    """
+    # Get HTTPS handler to talk to service
+    opener = urllib2.build_opener(HTTPSClientAuthHandler(PEM_FILE, CLIENT_CERT_FILE))
+    response = opener.open(job_id)
+    page = response.read()
+
+    if show_full:
+        log.info("Full response:\n{0}\n".format(page))
+
     results_file = re.split('"', page)[1]
     errors_file =  re.split('"', page)[3]
 
     log.info('Retrieving results...')
-    with open(RESULTS_FILE, 'w') as res_writer:
+    with open(OUTPUTS_FILE, 'wb') as res_writer:
         res_writer.write(opener.open(results_file).read())
 
     log.info('Retrieving errors (if any)...')
     with open(ERRORS_FILE, 'w') as err_writer:
         err_writer.write(opener.open(errors_file).read())
-
-    return open(RESULTS_FILE).read(), open(ERRORS_FILE).read()
 
 
 def write_job_file(job_file_path, executable_location, arguments):
@@ -311,7 +341,7 @@ def main():
         log.debug('Sleeping for 10 seconds...')
         time.sleep(20)
  
-    get_job_response(job_id)
+    resp = get_job_response(job_id)
 
 
 if __name__ == "__main__":
@@ -320,7 +350,7 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     if args:
         print get_job_status(args[0])
-        get_job_response(args[0])
+        get_job_response(args[0], show_full=True)
     else:
         main()
 
