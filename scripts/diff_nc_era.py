@@ -45,6 +45,7 @@ Where:
 import os
 import sys
 import re
+import time
 import shutil
 import datetime
 from dateutil import parser
@@ -125,12 +126,13 @@ def _package_outputs(*output_files):
     os.system("cd {} ; zip -r {} {}".format(common_dir, out_zip, " ".join(rel_paths)))
     
     # Copy outputs to job dir
+    time.sleep(0.5)
     shutil.copy(os.path.join(common_dir, out_zip), job_dir)
 
     return True  
 
     
-def run_diff_nc_era(variable, date_time, output_file, input_file=None):
+def run_diff_nc_era(variable, date_time, output_file, input_file=None, verbose=False):
     """
     Run the 'diff_nc_era' process.
     """
@@ -152,12 +154,12 @@ FILE PATHS: Reference file: %s; User-selected file: %s; User-input file: %s;
 RESULTS: Min: %.6f; Max: %.6f; 
 """ % (variable, date_time, constant, ref_file, test_file, input_file, mn, mx)
 
-    print "OUTPUTS:\n{0}".format(output)
+    if verbose: print "OUTPUTS:\n{0}".format(output)
 
     with open(output_file, "w") as writer:
         writer.write(output)
  
-    print "Wrote output to: %s" % output_file
+    if verbose: print "Wrote output to: %s" % output_file
 
     _package_outputs(output_file)
     return output_file
@@ -194,4 +196,4 @@ if __name__ == "__main__":
             if len(args) > 3: 
                 input_file = args[3] 
  
-            print run_diff_nc_era(variable, date_time, output_file, input_file)
+            run_diff_nc_era(variable, date_time, output_file, input_file)

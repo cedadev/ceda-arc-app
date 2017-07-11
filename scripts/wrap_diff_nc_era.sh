@@ -16,6 +16,7 @@ output_file=${output_dir}/output.txt
 cmd="/usr/bin/python2.7 $WD/ceda-arc-app/scripts/diff_nc_era.py $variable $datetime $output_file"
 
 echo "Running job: $cmd"
+
 $cmd
 
-echo "Done"
+# echo "Done"
