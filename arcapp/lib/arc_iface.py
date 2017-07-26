@@ -11,6 +11,7 @@ import os
 import time
 
 # Local imports
+from arcapp.models import *
 from arcapp.vocabs import STATUS_VALUES
 
 # Import ARC CE library
@@ -91,11 +92,18 @@ def get_arc_job_status(remote_job_id, job_id):
     :param remote_job_id (string): remote (ARC) job ID.
     :param job_id (string): local job ID.
     :return: tuple of (STATUS_VALUE, <dict_of_results>|None)
-    """    
+    """     
+    job = Job.objects.get(job_id=job_id)
+    download_url = "http://localhost/arc-outputs/%d/outputs.zip" % job_id 
+
+    if job.status == STATUS_VALUES.COMPLETED:
+        return job.status, {"output_path_uri": download_url} 
+
+    # If status is not COMPLETED then talk to ARC server 
     job_status = arclib.get_job_status(remote_job_id)
 
     status = _map_arc_status(job_status)
     if status == STATUS_VALUES.COMPLETED:
         _cache_outputs_on_disk(remote_job_id, job_id)
     
-    return status, {"output_path_uri": "http://localhost/arc-outputs/%d/outputs.zip" % job_id}
+    return status, {"output_path_uri": download_url}
