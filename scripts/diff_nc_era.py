@@ -43,7 +43,10 @@ Where:
 
 # Imports
 import os
+import sys
 import re
+import time
+import shutil
 import datetime
 from dateutil import parser
 
@@ -96,8 +99,40 @@ def get_var(path, varid):
     f = cf.read(path, select='ncvar%%%s' % varid, squeeze=True)
     return f
 
+
+def _package_outputs(*output_files):
+    """
+    Packages up all outputs into `outputs.zip` and copies them to the 
+    LSF job directory (if the $LSB_OUTDIR environment variable exists).
+
+    :param output_files [a list of file paths to zip up]
+    :return: boolean (True if output zip file copied to external directory).
+    """
+    # Check if directory is known, if not return False
+    job_dir = os.environ.get("LSB_OUTDIR", None)
+    if not job_dir:
+        return False
+            
+    # Get common directory to zip from
+    if len(output_files) == 1:
+        common_dir = os.path.dirname(output_files[0])
+    else:
+        common_dir = os.path.commonprefix(output_files)
+
+    rel_paths = [fpath.replace(common_dir + "/", "") for fpath in output_files]    
+    out_zip = "outputs.zip"
+
+    # Zip up outputs
+    os.system("cd {} ; zip -r {} {}".format(common_dir, out_zip, " ".join(rel_paths)))
     
-def run_diff_nc_era(variable, date_time, output_file, input_file=None):
+    # Copy outputs to job dir
+    time.sleep(0.5)
+    shutil.copy(os.path.join(common_dir, out_zip), job_dir)
+
+    return True  
+
+    
+def run_diff_nc_era(variable, date_time, output_file, input_file=None, verbose=False):
     """
     Run the 'diff_nc_era' process.
     """
@@ -119,10 +154,14 @@ FILE PATHS: Reference file: %s; User-selected file: %s; User-input file: %s;
 RESULTS: Min: %.6f; Max: %.6f; 
 """ % (variable, date_time, constant, ref_file, test_file, input_file, mn, mx)
 
+    if verbose: print "OUTPUTS:\n{0}".format(output)
+
     with open(output_file, "w") as writer:
         writer.write(output)
  
-    print "Wrote output to: %s" % output_file
+    if verbose: print "Wrote output to: %s" % output_file
+
+    _package_outputs(output_file)
     return output_file
 
 
@@ -141,7 +180,7 @@ def test():
 if __name__ == "__main__":
 
     TEST = False
-    TEST = True
+#    TEST = True
 
     if TEST:
         test()
@@ -157,4 +196,4 @@ if __name__ == "__main__":
             if len(args) > 3: 
                 input_file = args[3] 
  
-            print run_diff_nc_era(variable, date_time, output_file, input_file)
+            run_diff_nc_era(variable, date_time, output_file, input_file)
