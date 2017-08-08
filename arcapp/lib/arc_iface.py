@@ -13,6 +13,7 @@ import time
 # Local imports
 from arcapp.models import *
 from arcapp.vocabs import STATUS_VALUES
+from arcproj.settings import OUTPUTS_DIR
 
 # Import ARC CE library
 from arcapp.lib import arclib
@@ -71,7 +72,7 @@ def _cache_outputs_on_disk(remote_job_id, job_id):
     :param job_id [string]
     :return: boolean (True if saved; False if already saved).
     """
-    output_path = "/var/www/html/arc-outputs/{0}/outputs.zip".format(job_id)
+    output_path = "{0}/{1}/outputs.zip".format(OUTPUTS_DIR, job_id)
 
     if os.path.isfile(output_path):
         return False
@@ -94,7 +95,7 @@ def get_arc_job_status(remote_job_id, job_id):
     :return: tuple of (STATUS_VALUE, <dict_of_results>|None)
     """     
     job = Job.objects.get(job_id=job_id)
-    download_url = "http://localhost/arc-outputs/%d/outputs.zip" % job_id 
+    download_url = "/download/{0}/".format(job_id)
 
     if job.status == STATUS_VALUES.COMPLETED:
         return job.status, {"output_path_uri": download_url} 
