@@ -1,14 +1,17 @@
+import os.path
+
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth import logout
 
+from jasmin_arc import ArcInterface, JOB_STATUSES
+
 from arcapp.models import *
 from arcapp.forms import *
-from arcapp.lib import arc_iface
-from arcapp.vocabs import STATUS_VALUES
 
 from arcproj.settings import OUTPUTS_DIR
 
+arc_api = ArcInterface("myconfig.json")
 
 def view_logout(request):
     logout(request)
@@ -19,7 +22,7 @@ def view_submit(request):
 
     if not request.user.is_authenticated() or not request.user.has_perm('arcapp.arc_ce'):
         return redirect('/login/?next=/submit/')
- 
+
     # if this is a POST request we need to process the form data
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
@@ -37,14 +40,14 @@ def view_submit(request):
             executable = "/group_workspaces/jasmin/cedaproc/arc_ce_test/ceda-arc-app/scripts/wrap_diff_nc_era.sh"
             remote_args = [job.variable, job.date_time.isoformat()]
 
-            status, remote_id = arc_iface.submit_job(job.job_id, executable, *remote_args, 
-                                                     input_file_path=job.input_file_path)
+            remote_id = arc_api.submit_job(executable, *remote_args,
+                                           input_file_path=job.input_file_path)
 
-            job.status = status
+            job.status = arc_api.get_job_status(remote_id)
 
-            if status != STATUS_VALUES.FAILED:
+            if job.status != JOB_STATUSES.FAILED:
                 job.remote_id = remote_id
-            
+
             job.save()
 
             # Capture submit status
@@ -70,39 +73,44 @@ def view_job(request, job_id):
     job = Job.objects.get(job_id=job_id)
 
     # Provide extra info if job completed
-    status, resp = arc_iface.get_arc_job_status(job.remote_id, job_id)
+    status = arc_api.get_job_status(job.remote_id)
     job.status = status
 
-    if status == STATUS_VALUES.COMPLETED:
-        download_url = resp["output_path_uri"]
+    if status == JOB_STATUSES.COMPLETED:
+        download_url = "/download/{0}/".format(job_id)
         job.output_file_path = download_url
     else:
         download_url = None
- 
-    job.save()
-  
-    # Check GET args to update messages to user 
-    submitted = just_failed = failed = False 
 
-    submit_status = request.GET.get("submit_status", False) 
-    if submit_status == STATUS_VALUES.FAILED:
+    job.save()
+
+    # Check GET args to update messages to user
+    submitted = just_failed = failed = False
+
+    submit_status = request.GET.get("submit_status", False)
+    if submit_status == JOB_STATUSES.FAILED:
         just_failed = True
 
-    failed = status == STATUS_VALUES.FAILED 
+    failed = status == JOB_STATUSES.FAILED
 
-    if not failed and submit_status == STATUS_VALUES.IN_PROGRESS: 
-        submitted = True 
+    if not failed and submit_status == JOB_STATUSES.IN_PROGRESS:
+        submitted = True
 
     return render(request, 'job.html', {'job': job, 'failed': failed, 'submitted': submitted, 'just_failed': just_failed,
-                             'download_url': download_url, 'page_title': 'Job'}) 
+                             'download_url': download_url, 'page_title': 'Job'})
 
 
-def view_home(request): 
-    return render(request, 'index.html', {'page_title': 'Home'}) 
+def view_home(request):
+    return render(request, 'index.html', {'page_title': 'Home'})
 
 
 def download(request, job_id):
-    path_to_file = '{0}/{1}/outputs.zip'.format(OUTPUTS_DIR, job_id)
+    remote_id = Job.objects.get(job_id=job_id).remote_id
+    path_to_file = '{0}/{1}/outputs.zip'.format(OUTPUTS_DIR, remote_id)
+
+    if os.path.isfile(path_to_file):
+        arc_api.save_job_outputs(remote_id, path_to_file)
+
     zip_file = open(path_to_file, 'r')
     response = HttpResponse(zip_file, content_type='application/force-download')
     response['Content-Disposition'] = 'attachment; filename="%s"' % 'outputs.zip'

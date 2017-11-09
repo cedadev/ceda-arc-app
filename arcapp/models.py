@@ -8,7 +8,9 @@ UTC = timezone.UTC()
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-from arcapp.vocabs import STATUS_VALUES, VARIABLES, DATA_FILES
+from jasmin_arc import JOB_STATUSES
+
+from arcapp.vocabs import VARIABLES, DATA_FILES
 
 
 class Job(models.Model):
@@ -19,15 +21,15 @@ class Job(models.Model):
     # Remote ID can be empty until we have submitted the job and got back id
     remote_id = models.CharField(max_length=200, verbose_name="Remote Job ID")
     status = models.CharField(max_length=20, verbose_name="Job Status",
-                choices=STATUS_VALUES.items(), default=STATUS_VALUES.NOT_SUBMITTED)
+                choices=JOB_STATUSES.items(), default=JOB_STATUSES.NOT_SUBMITTED)
 
     # Inputs
     date_time = models.DateTimeField(verbose_name="DateTime", default=datetime.datetime(1990, 1, 1, 0, tzinfo=UTC))
-    variable = models.CharField(max_length=20, verbose_name="Variable", 
+    variable = models.CharField(max_length=20, verbose_name="Variable",
                 choices=VARIABLES.items(), default=VARIABLES.tas)
 
     # These two can be empty
-    input_file_path = models.CharField(max_length=200, choices=DATA_FILES.items(), null=True, blank=True) 
+    input_file_path = models.CharField(max_length=200, choices=DATA_FILES.items(), null=True, blank=True)
     output_file_path = models.CharField(max_length=200)
 
 

@@ -4,15 +4,6 @@ class DictByAttr(dict):
         return self.__getitem__(key)
 
 
-STATUS_VALUES = DictByAttr(
-    {
-        'COMPLETED': 'completed',
-        'IN_PROGRESS': 'in progress',
-        'NOT_STARTED': 'not started',
-        'NOT_SUBMITTED': 'not submitted',
-        'FAILED': 'failed'
-    }.items())
-
 VARIABLES = DictByAttr(
     {
         'tas': 'Mean air temperature',
