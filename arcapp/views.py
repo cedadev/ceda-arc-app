@@ -11,7 +11,7 @@ from arcapp.forms import *
 
 from arcproj.settings import OUTPUTS_DIR
 
-arc_api = ArcInterface("myconfig.json")
+arc_api = ArcInterface()
 
 def view_logout(request):
     logout(request)
