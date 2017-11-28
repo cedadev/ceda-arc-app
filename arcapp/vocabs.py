@@ -14,7 +14,7 @@ VARIABLES = DictByAttr(
 
 DATA_FILES =  DictByAttr(
     {
-        'data1.txt': 'eg_files/data1.txt',
-        'data2.txt': 'eg_files/data2.txt',
-        'data3.txt': 'eg_files/data3.txt'
+        'eg_files/data1.txt': 'eg_files/data1.txt',
+        'eg_files/data2.txt': 'eg_files/data2.txt',
+        'eg_files/data3.txt': 'eg_files/data3.txt'
     }.items())

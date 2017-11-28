@@ -43,7 +43,11 @@ def view_submit(request):
             # Submit job to ARC CE
             executable = "/group_workspaces/jasmin/cedaproc/arc_ce_test/ceda-arc-app/scripts/wrap_diff_nc_era.sh"
             remote_args = [job.variable, job.date_time.isoformat()]
-            remote_id = arc_api.submit_job(executable, args=remote_args)
+            input_files = []
+            if job.input_file_path:
+                input_files.append(job.input_file_path)
+
+            remote_id = arc_api.submit_job(executable, args=remote_args, input_files=input_files)
             job.status = arc_api.get_job_status(remote_id).value
 
             if job.status != JobStatuses.FAILED.value:
