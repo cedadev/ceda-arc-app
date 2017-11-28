@@ -27,10 +27,13 @@ $ cp arcproj/settings_local.py.tmpl arcproj/settings_local.py
 In the `settings_local.py` file make up a secret key string (about 30 characters)
 and add the hostname to the `ALLOWED_HOSTS` list.
 
-If not using the default settings for `jasmin_arc` (e.g. different location of private key,
-certificate, output filename etc) then create a JSON config file and put the path to it in
-`JASMIN_ARC_CONFIG` in `settings_local.py`. Read the full documentation for `jasmin_arc` on
-[readthedocs](http://jasmin-arc-py.readthedocs.io/en/latest/).
+See the `jasmin_arc` documentation on
+[readthedocs](http://jasmin-arc-py.readthedocs.io/en/latest/) for how to set up and install
+`jasmin_arc`.
+
+If not using the default settings (e.g. different location of private key, certificate,
+output filename etc) then create a JSON config file and put the path to it in `JASMIN_ARC_CONFIG`
+in `settings_local.py`.
 
 ## Set up database
 
@@ -43,9 +46,12 @@ $ python manage.py migrate
 
 ```
 $ python manage.py runserver localhost:8000
+```
 
 ## Testing
 
 Try:
 
-`$ py.test -k arcapp`
+```
+$ py.test -k arcapp`
+```
