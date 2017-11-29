@@ -96,7 +96,7 @@ def get_nc_path(date_time):
 
 
 def get_var(path, varid):
-    f = cf.read(path, select='ncvar%%%s' % varid, squeeze=True)
+    f = cf.read(path, select='ncvar%%%s' % varid, squeeze=True)[0]
     return f
 
 
