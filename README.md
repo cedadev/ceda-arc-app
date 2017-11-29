@@ -31,9 +31,10 @@ See the `jasmin_arc` documentation on
 [readthedocs](http://jasmin-arc-py.readthedocs.io/en/latest/) for how to set up and install
 `jasmin_arc`.
 
-If not using the default settings (e.g. different location of private key, certificate,
-output filename etc) then create a JSON config file and put the path to it in `JASMIN_ARC_CONFIG`
-in `settings_local.py`.
+A minimal `jasmin_arc` config file is included at `arcproj/jasmin_arc_config.json`. To change other
+options (e.g. different location of private key, certificate, output filename etc), either edit
+this file or change the `JASMIN_ARC_CONFIG` setting in `settings_local.py` to point to a different
+config file.
 
 ## Set up database
 
