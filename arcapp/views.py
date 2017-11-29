@@ -7,6 +7,8 @@ from arcapp.forms import *
 from arcapp.lib import arc_iface
 from arcapp.vocabs import STATUS_VALUES
 
+from arcproj.settings import OUTPUTS_DIR
+
 
 def view_logout(request):
     logout(request)
@@ -97,3 +99,11 @@ def view_job(request, job_id):
 
 def view_home(request): 
     return render(request, 'index.html', {'page_title': 'Home'}) 
+
+
+def download(request, job_id):
+    path_to_file = '{0}/{1}/outputs.zip'.format(OUTPUTS_DIR, job_id)
+    zip_file = open(path_to_file, 'r')
+    response = HttpResponse(zip_file, content_type='application/force-download')
+    response['Content-Disposition'] = 'attachment; filename="%s"' % 'outputs.zip'
+    return response

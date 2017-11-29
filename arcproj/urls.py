@@ -29,5 +29,6 @@ urlpatterns = [
     url(r'^submit/', arcapp.views.view_submit, name='submit'),
     url(r'^login/$', auth_views.login, name='login'),
     url(r'^logout/$', arcapp.views.view_logout, name='logout'),
+    url(r'^download/([0-9]+)/', arcapp.views.download, name='download'),
     url(r'^.*', arcapp.views.view_home, name='home')
 ]
